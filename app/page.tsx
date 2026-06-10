@@ -157,7 +157,7 @@ export default function Home() {
             
             <motion.div 
               className="flex w-max gap-4 md:gap-6"
-              animate={{ x: ["-50%", "0%"] }}
+              animate={{ x: ["0%", "-50%"] }}
               transition={{ repeat: Infinity, ease: "linear", duration: 35 }}
             >
               {[...heroCategories, ...heroCategories, ...heroCategories, ...heroCategories].map((collection, idx) => (
@@ -590,7 +590,7 @@ export default function Home() {
             
             <motion.div 
               className="flex w-max gap-6"
-              animate={{ x: ["-50%", "0%"] }}
+              animate={{ x: ["0%", "-50%"] }}
               transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
             >
               {[...testimonials, ...testimonials, ...testimonials, ...testimonials].map((review, idx) => (
