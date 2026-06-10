@@ -150,43 +150,52 @@ export default function Home() {
             </motion.p>
           </div>
           
-          <div className="flex -mx-6 px-6 md:mx-0 md:px-0 md:grid md:grid-cols-6 gap-4 md:gap-6 overflow-x-auto pb-8 md:pb-0 after:content-[''] after:min-w-[24px] md:after:hidden">
-            {heroCategories.map((collection, idx) => (
-              <motion.div 
-                initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={fadeUp} 
-                key={idx} 
-                className={`relative min-w-[85vw] sm:min-w-[60vw] md:min-w-0 ${collection.span} h-[420px] md:h-[500px] snap-center`}
-              >
-                <Link 
-                  href={`/shop?category=${collection.slug}`} 
-                  className="block w-full h-full overflow-hidden group rounded-md bg-neutral-900 border border-white/5 relative"
+          <div className="overflow-hidden pb-8 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0 relative group">
+            {/* Edge fades for seamless look */}
+            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-brand-card to-transparent z-10 pointer-events-none hidden md:block" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-brand-card to-transparent z-10 pointer-events-none hidden md:block" />
+            
+            <motion.div 
+              className="flex w-max gap-4 md:gap-6"
+              animate={{ x: ["-50%", "0%"] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 35 }}
+            >
+              {[...heroCategories, ...heroCategories, ...heroCategories, ...heroCategories].map((collection, idx) => (
+                <div 
+                  key={idx} 
+                  className={`relative w-[85vw] sm:w-[350px] md:w-[400px] shrink-0 h-[420px] md:h-[500px]`}
                 >
-                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-500 z-10" />
-                  <Image
-                    src={collection.image}
-                    alt={collection.name}
-                    fill
-                    referrerPolicy="no-referrer"
-                    className="object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
-                  />
-                  
-                  <div className="absolute inset-x-0 top-0 p-6 z-20 flex justify-between items-start opacity-100 transition-opacity">
-                     <div className="bg-brand-primary text-black rounded-md text-[10px] sm:text-xs font-bold px-3 py-1.5 uppercase tracking-widest">
-                       {collection.label}
-                     </div>
-                  </div>
-
-                  <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 flex flex-col justify-end z-20 transition-transform duration-500">
-                    <h3 className="text-white font-display uppercase tracking-wider text-4xl md:text-5xl mb-2 shadow-black drop-shadow-xl group-hover:text-brand-primary transition-colors">{collection.name}</h3>
-                    <div className="flex mt-4 opacity-0 -translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
-                      <span className="flex items-center rounded-md text-white text-sm font-bold uppercase tracking-widest bg-white/10 backdrop-blur-md px-6 py-3 border border-white/20 group-hover:bg-brand-primary group-hover:text-black group-hover:border-brand-primary">
-                        Shop Now <ArrowRight className="ml-2 h-4 w-4" />
-                      </span>
+                  <Link 
+                    href={`/shop?category=${collection.slug}`} 
+                    className="block w-full h-full overflow-hidden group/card rounded-md bg-neutral-900 border border-white/5 relative"
+                  >
+                    <div className="absolute inset-0 bg-black/40 group-hover/card:bg-black/60 transition-colors duration-500 z-10" />
+                    <Image
+                      src={collection.image}
+                      alt={collection.name}
+                      fill
+                      referrerPolicy="no-referrer"
+                      className="object-cover transition-transform duration-1000 group-hover/card:scale-110 opacity-80 group-hover/card:opacity-100"
+                    />
+                    
+                    <div className="absolute inset-x-0 top-0 p-6 z-20 flex justify-between items-start opacity-100 transition-opacity">
+                       <div className="bg-brand-primary text-black rounded-md text-[10px] sm:text-xs font-bold px-3 py-1.5 uppercase tracking-widest">
+                         {collection.label}
+                       </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+
+                    <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 flex flex-col justify-end z-20 transition-transform duration-500">
+                      <h3 className="text-white font-display uppercase tracking-wider text-4xl md:text-5xl mb-2 shadow-black drop-shadow-xl group-hover/card:text-brand-primary transition-colors">{collection.name}</h3>
+                      <div className="flex mt-4 opacity-0 -translate-y-4 group-hover/card:opacity-100 group-hover/card:translate-y-0 transition-all duration-500">
+                        <span className="flex items-center rounded-md text-white text-sm font-bold uppercase tracking-widest bg-white/10 backdrop-blur-md px-6 py-3 border border-white/20 group-hover/card:bg-brand-primary group-hover/card:text-black group-hover/card:border-brand-primary">
+                          Shop Now <ArrowRight className="ml-2 h-4 w-4" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </motion.div>
           </div>
         </div>
       </section>
@@ -574,45 +583,54 @@ export default function Home() {
             </motion.div>
           </div>
 
-          <div className="flex -mx-6 px-6 md:mx-0 md:px-0 md:grid md:grid-cols-3 gap-6 overflow-x-auto pb-8 md:pb-0 after:content-[''] after:min-w-[24px] md:after:hidden">
-            {testimonials.map((review) => (
-              <motion.div 
-                initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={fadeUp} 
-                key={review.id} 
-                className="min-w-[85vw] sm:min-w-[400px] md:min-w-0 snap-center bg-brand-card border border-white/5 hover:border-brand-primary/30 p-6 flex flex-col group rounded-md lg:hover:-translate-y-2 transition-all duration-500"
-              >
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex text-brand-accent">
-                    {[...Array(5)].map((_, i) => (
-                       <Star key={i} className={`w-4 h-4 ${i < Math.floor(review.rating) ? 'fill-current' : 'text-gray-600'}`} />
-                    ))}
+          <div className="overflow-hidden pb-8 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0 relative group">
+            {/* Edge fades for seamless look */}
+            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-brand-dark to-transparent z-10 pointer-events-none hidden md:block" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-brand-dark to-transparent z-10 pointer-events-none hidden md:block" />
+            
+            <motion.div 
+              className="flex w-max gap-6"
+              animate={{ x: ["-50%", "0%"] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
+            >
+              {[...testimonials, ...testimonials, ...testimonials, ...testimonials].map((review, idx) => (
+                <div 
+                  key={`${review.id}-${idx}`} 
+                  className="w-[85vw] sm:w-[350px] md:w-[400px] shrink-0 bg-brand-card border border-white/5 hover:border-brand-primary/30 p-6 flex flex-col group/review rounded-md transition-all duration-500 hover:-translate-y-2"
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex text-brand-accent">
+                      {[...Array(5)].map((_, i) => (
+                         <Star key={i} className={`w-4 h-4 ${i < Math.floor(review.rating) ? 'fill-current' : 'text-gray-600'}`} />
+                      ))}
+                    </div>
+                    <div className="bg-brand-primary/10 text-brand-primary text-[10px] right-3 font-bold px-2 py-1 uppercase rounded-md tracking-widest flex items-center border border-brand-primary/20">
+                      <CheckCircle className="w-3 h-3 mr-1" /> Verified Order
+                    </div>
                   </div>
-                  <div className="bg-brand-primary/10 text-brand-primary text-[10px] right-3 font-bold px-2 py-1 uppercase rounded-md tracking-widest flex items-center border border-brand-primary/20">
-                    <CheckCircle className="w-3 h-3 mr-1" /> Verified Order
+                  
+                  <p className="text-gray-300 text-base md:text-lg italic mb-8 flex-1 leading-relaxed">
+                    &ldquo;{review.text}&rdquo;
+                  </p>
+                  
+                  <div className="flex items-center gap-4 mt-auto">
+                    <Image
+                      src={review.profile}
+                      alt={review.name}
+                      width={48}
+                      height={48}
+                      className="rounded-full object-cover border-2 border-white/10 group-hover/review:border-brand-primary/50 transition-colors"
+                    />
+                    <div>
+                      <p className="text-white font-bold text-sm tracking-wide">{review.name}</p>
+                      <p className="text-gray-400 text-xs mt-1 flex items-center font-medium">
+                        Purchased: <span className="text-brand-primary ml-1">{review.product}</span>
+                      </p>
+                    </div>
                   </div>
                 </div>
-                
-                <p className="text-gray-300 text-base md:text-lg italic mb-8 flex-1 leading-relaxed">
-                  &ldquo;{review.text}&rdquo;
-                </p>
-                
-                <div className="flex items-center gap-4 mt-auto">
-                  <Image
-                    src={review.profile}
-                    alt={review.name}
-                    width={48}
-                    height={48}
-                    className="rounded-full object-cover border-2 border-white/10 group-hover:border-brand-primary/50 transition-colors"
-                  />
-                  <div>
-                    <p className="text-white font-bold text-sm tracking-wide">{review.name}</p>
-                    <p className="text-gray-400 text-xs mt-1 flex items-center font-medium">
-                      Purchased: <span className="text-brand-primary ml-1">{review.product}</span>
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+              ))}
+            </motion.div>
           </div>
         </div>
       </section>
