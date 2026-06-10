@@ -68,7 +68,7 @@ export const brand = {
   whatsappNumber: "254798020646",
   whatsappMessage: {
     general:
-      "Hello Nyambu Drip Collection,\n\nI would like to place an order.\n\nShoe Screenshot/Name:\n\nShoe Size:\nPreferred Colour:\nDelivery/Pickup Location:\n\nPlease confirm availability. Thank you!",
+      "Hello Nyambu Drip Collection,\n\nI would like to place an order.\n\nShoe Screenshot/Name:\n\nShoe Size:\nPreferred Colour:\n\nDelivery/Pickup Location:\n\nPlease confirm availability. Thank you!",
   },
   socialLinks: {
     instagram: "https://instagram.com/nyambu_drip_collection",
