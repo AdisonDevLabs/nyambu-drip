@@ -11,6 +11,9 @@ import { brand } from '@/lib/data/brand';
 import { navSearchSuggestions, navLinksData } from '@/lib/data/categories';
 import { AnnouncementBar } from './AnnouncementBar';
 
+// Apply the same luxury curve used in your animations.ts
+const premiumEasing: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 export function NavBar() {
   const { cartCount, setIsCartOpen } = useCart();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -85,13 +88,14 @@ export function NavBar() {
                   {isSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
                 </button>
                 
-                {/* Search Dropdown */}
+                {/* Search Dropdown - Updated ease */}
                 <AnimatePresence>
                   {isSearchOpen && (
                     <motion.div 
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.4, ease: premiumEasing }}
                       className="absolute top-10 right-0 w-72 bg-brand-card border border-white/10 rounded-md shadow-2xl p-4 origin-top-right z-50"
                     >
                       <div className="relative">

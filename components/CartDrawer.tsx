@@ -10,6 +10,9 @@ import { formatPrice } from '@/lib/data';
 import { brand, cartTrustFeatures } from '@/lib/data/brand';
 import Image from 'next/image';
 
+// Apply the same luxury curve used in your animations.ts
+const premiumEasing: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 export function CartDrawer() {
   const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart();
 
@@ -36,16 +39,17 @@ export function CartDrawer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: premiumEasing }}
             onClick={() => setIsCartOpen(false)}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity"
           />
 
-          {/* Drawer - Fixed Viewport constraints using inset-y-0 */}
+          {/* Drawer - Removed bouncy spring, implemented smooth premium ease */}
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            transition={{ duration: 0.6, ease: premiumEasing }}
             className="fixed inset-y-0 right-0 w-full max-w-[450px] bg-brand-card shadow-2xl z-[60] flex flex-col pt-safe pb-safe-offset border-l border-white/10"
           >
             {/* Header */}

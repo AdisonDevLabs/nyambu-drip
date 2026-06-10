@@ -13,6 +13,7 @@ import { brand } from '@/lib/data/brand';
 import { colorMap, sizeGuideData } from '@/lib/data/products';
 import { useCart } from '@/lib/CartContext';
 import { motion, AnimatePresence } from 'motion/react';
+import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations';
 
 export default function ProductDetails() {
   const params = useParams();
@@ -36,8 +37,8 @@ export default function ProductDetails() {
   
   const { addToCart, setIsCartOpen } = useCart();
   
-  const [selectedSize, setSelectedSize] = useState<string>(product?.sizes[0] || '');
-  const [selectedColor, setSelectedColor] = useState<string>(product?.colors[0] || '');
+  const [selectedSize, setSelectedSize] = useState<string>(product?.sizes?.[0] || '');
+  const [selectedColor, setSelectedColor] = useState<string>(product?.colors?.[0] || '');
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
@@ -48,7 +49,11 @@ export default function ProductDetails() {
   useEffect(() => {
     window.scrollTo(0, 0);
     setActiveImage(0); 
-  }, [id]);
+    if (product) {
+       setSelectedSize(product.sizes?.[0] || '');
+       setSelectedColor(product.colors?.[0] || '');
+    }
+  }, [id, product]);
 
   // Handle Sticky Mobile CTA Visibility
   useEffect(() => {
@@ -62,7 +67,10 @@ export default function ProductDetails() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-brand-dark text-white pt-[120px]">
+      <motion.div 
+        initial="hidden" animate="visible" variants={fadeUp}
+        className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-brand-dark text-white pt-[120px]"
+      >
         <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
           <SearchX className="h-8 w-8 text-gray-400" />
         </div>
@@ -71,9 +79,61 @@ export default function ProductDetails() {
         <button onClick={() => router.push('/shop')} className="inline-flex h-14 px-8 bg-white text-black font-bold uppercase tracking-widest hover:bg-brand-primary transition-colors items-center justify-center rounded-md">
           Back to Shop
         </button>
-      </div>
+      </motion.div>
     );
   }
+
+  const images = product.images && product.images.length > 0 
+  ? product.images 
+  : [product.image];
+
+  const handleColorSelect = (color: string) => {
+    setSelectedColor(color);
+    if (images.length <= 1) return;
+    
+    const colorLower = color.toLowerCase();
+    
+    // 1. Direct match by parsing color string to find image match
+    let matchedIdx = images.findIndex(img => {
+      const imgName = img.toLowerCase();
+      return imgName.includes(colorLower) || 
+             colorLower.split(' ').some(term => term.length > 1 && imgName.includes(term));
+    });
+    
+    // 2. Fallback to index mapping if array lengths correspond
+    if (matchedIdx === -1 && product.colors) {
+      const cIdx = product.colors.indexOf(color);
+      if (cIdx >= 0 && cIdx < images.length) {
+        matchedIdx = cIdx;
+      }
+    }
+    
+    if (matchedIdx !== -1) {
+      setActiveImage(matchedIdx);
+    }
+  };
+
+  const handleImageSelect = (idx: number) => {
+    setActiveImage(idx);
+    if (!product.colors || product.colors.length <= 1) return;
+    
+    const imgName = images[idx].toLowerCase();
+    
+    // Reverse mapping image to color state
+    let matchedColor = product.colors.find(c => {
+       const cLower = c.toLowerCase();
+       return imgName.includes(cLower) ||
+              cLower.split(' ').some(term => term.length > 1 && imgName.includes(term));
+    });
+    
+    if (!matchedColor && idx < product.colors.length) {
+       matchedColor = product.colors[idx];
+    }
+    
+    if (matchedColor) {
+       setSelectedColor(matchedColor);
+    }
+  };
 
   const triggerSizeError = () => {
     setSizeError(true);
@@ -82,7 +142,7 @@ export default function ProductDetails() {
   };
 
   const handleAddToCart = () => {
-    if (!selectedSize) return triggerSizeError();
+    if (!selectedSize && product.sizes && product.sizes.length > 0) return triggerSizeError();
     addToCart(product, selectedSize, selectedColor, quantity);
     setShowAddedToast(true);
     setTimeout(() => {
@@ -91,16 +151,12 @@ export default function ProductDetails() {
   };
   
   const handleWhatsAppCheckout = () => {
-    if (!selectedSize) return triggerSizeError();
+    if (!selectedSize && product.sizes && product.sizes.length > 0) return triggerSizeError();
     const message = `Hello ${brand.name},\n\nI'd like to order:\n\n• Product: ${product.name}\n${selectedSize ? `• Size/Option: ${selectedSize}\n` : ''}${selectedColor ? `• Color: ${selectedColor}\n` : ''}• Quantity: ${quantity}\n\nPlease confirm availability and delivery details.\n\nThank you.`;
     
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${brand.whatsappNumber}?text=${encodedMessage}`, '_blank');
   };
-
-  const images = product.images && product.images.length > 0 
-  ? product.images 
-  : [product.image];
 
   return (
     <div className="bg-brand-dark text-white min-h-screen relative pb-20 md:pb-0">
@@ -134,7 +190,10 @@ export default function ProductDetails() {
       </AnimatePresence>
 
       {/* Breadcrumbs (Desktop) */}
-      <div className="bg-brand-card py-4 px-6 border-b border-white/10 hidden md:block">
+      <motion.div 
+        initial="hidden" animate="visible" variants={fadeUp}
+        className="bg-brand-card py-4 px-6 border-b border-white/10 hidden md:block"
+      >
         <div className="max-w-7xl mx-auto flex items-center text-xs font-bold uppercase tracking-widest text-gray-500">
           <Link href="/" className="hover:text-white transition-colors">Home</Link>
           <span className="mx-2 text-white/20">/</span>
@@ -144,21 +203,27 @@ export default function ProductDetails() {
           <span className="mx-2 text-white/20">/</span>
           <span className="text-brand-primary truncate">{product.name}</span>
         </div>
-      </div>
+      </motion.div>
 
       {/* Mobile Back Button - Changed to scroll normally with page rather than obscuring content */}
-      <div className="md:hidden w-full bg-brand-card border-b border-white/10 px-4 py-3">
+      <motion.div 
+        initial="hidden" animate="visible" variants={fadeUp}
+        className="md:hidden w-full bg-brand-card border-b border-white/10 px-4 py-3"
+      >
         <button onClick={() => router.back()} className="flex items-center text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4 mr-2" /> Back To Shop
         </button>
-      </div>
+      </motion.div>
 
       <div className="pt-6 md:pt-12">
         <div className="max-w-7xl mx-auto px-0 md:px-6 md:pb-12">
           <div className="flex flex-col md:flex-row gap-0 md:gap-12 lg:gap-16">
             
             {/* Image Gallery */}
-            <div className="md:w-1/2 md:sticky md:top-24 h-fit z-10">
+            <motion.div 
+              initial="hidden" animate="visible" variants={fadeUp}
+              className="md:w-1/2 md:sticky md:top-24 h-fit z-10"
+            >
               <div className="relative aspect-[3/4] md:aspect-[4/5] w-full max-h-[calc(100vh-200px)] bg-brand-card overflow-hidden border-b md:border border-white/10 group md:rounded-md">
                 {product.isFlashDeal ? (
                   <div className="absolute top-4 left-4 z-20 bg-brand-accent text-white text-[10px] font-bold px-3 py-1.5 uppercase tracking-widest shadow-xl rounded-md">Sale</div>
@@ -193,7 +258,7 @@ export default function ProductDetails() {
                   {images.map((_, idx) => (
                     <button 
                       key={idx} 
-                      onClick={() => setActiveImage(idx)}
+                      onClick={() => handleImageSelect(idx)}
                       className={`h-2 rounded-full transition-all ${activeImage === idx ? 'bg-brand-primary w-6' : 'bg-white/50 w-2'}`}
                     />
                   ))}
@@ -205,19 +270,22 @@ export default function ProductDetails() {
                 {images.map((img, idx) => (
                   <button 
                     key={idx} 
-                    onClick={() => setActiveImage(idx)}
+                    onClick={() => handleImageSelect(idx)}
                     className={`relative w-24 aspect-square flex-shrink-0 bg-brand-card border rounded-md overflow-hidden transition-all ${activeImage === idx ? 'border-brand-primary opacity-100' : 'border-white/10 opacity-50 hover:opacity-100'}`}
                   >
                     <Image src={img} alt={`Thumbnail ${idx + 1}`} fill referrerPolicy="no-referrer" className="object-cover" />
                   </button>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Product Info Panel */}
-            <div className="md:w-1/2 p-6 md:p-0 flex flex-col z-0">
+            <motion.div 
+              initial="hidden" animate="visible" variants={staggerContainer}
+              className="md:w-1/2 p-6 md:p-0 flex flex-col z-0"
+            >
               {/* Header info */}
-              <div className="mb-8 mt-2 md:mt-0">
+              <motion.div variants={staggerItem} className="mb-8 mt-2 md:mt-0">
                 <h1 className="font-display uppercase tracking-wide text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] mb-4">
                   {product.name}
                 </h1>
@@ -250,10 +318,10 @@ export default function ProductDetails() {
                     </span>
                   )}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Size & Color Selection */}
-              <div className="space-y-8 mb-10 py-8 border-y border-white/10">
+              <motion.div variants={staggerItem} className="space-y-8 mb-10 py-8 border-y border-white/10">
                 
                 {/* Color Selection */}
                 {product.colors && product.colors.length > 0 && (
@@ -265,7 +333,7 @@ export default function ProductDetails() {
                         return (
                           <button
                             key={color}
-                            onClick={() => setSelectedColor(color)}
+                            onClick={() => handleColorSelect(color)}
                             className={`relative w-12 h-12 rounded-full border-2 transition-all flex items-center justify-center ${
                               selectedColor === color ? 'border-brand-primary scale-110' : 'border-white/10 hover:border-white/50'
                             }`}
@@ -316,10 +384,10 @@ export default function ProductDetails() {
                     </div>
                   </div>
                 )}
-              </div>
+              </motion.div>
 
               {/* Primary Purchase Section */}
-              <div className="flex flex-col gap-4 mb-8">
+              <motion.div variants={staggerItem} className="flex flex-col gap-4 mb-8">
                 {/* Quantity Selector */}
                 <div className="mb-2">
                   <span className="font-bold text-white uppercase tracking-widest text-xs block mb-3">Quantity</span>
@@ -354,10 +422,10 @@ export default function ProductDetails() {
                 >
                   <MessageCircle className="h-4 w-4 mr-2" /> ORDER ON WHATSAPP
                 </button>
-              </div>
+              </motion.div>
 
               {/* Delivery & Trust Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-brand-card p-6 border border-white/5 mb-12 rounded-md">
+              <motion.div variants={staggerItem} className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-brand-card p-6 border border-white/5 mb-12 rounded-md">
                 <div className="flex items-start">
                   <Truck className="h-5 w-5 mr-3 text-gray-400 shrink-0" />
                   <div>
@@ -386,10 +454,10 @@ export default function ProductDetails() {
                     <p className="text-[10px] text-gray-500 uppercase tracking-widest">Direct help from our team</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Structured Product Description */}
-              <div className="space-y-10">
+              <motion.div variants={staggerItem} className="space-y-10">
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-4 border-b border-white/10 pb-2">Overview</h3>
                   <p className="text-gray-400 leading-relaxed font-light text-sm">
@@ -407,16 +475,19 @@ export default function ProductDetails() {
                     <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-brand-primary" /> Easy to Style</li>
                   </ul>
                 </div>
-              </div>
+              </motion.div>
               
-            </div>
+            </motion.div>
           </div>
         </div>
 
         {/* Customer Reviews Section */}
         <section id="reviews" className="border-t border-white/10 bg-brand-dark py-20 px-6">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
+            <motion.div 
+              initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={fadeUp}
+              className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12"
+            >
               <div>
                 <h2 className="font-display uppercase tracking-wide text-3xl md:text-5xl text-white mb-4">Why Customers Love It</h2>
                 <div className="flex items-center text-brand-primary">
@@ -429,11 +500,15 @@ export default function ProductDetails() {
               <button className="mt-6 md:mt-0 px-8 py-4 bg-transparent border border-white text-white rounded-md font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-colors">
                 Write a Review
               </button>
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {productReviews.map((review) => (
-                <div key={review.id} className="bg-brand-card p-6 border border-white/5 flex flex-col rounded-md">
+                <motion.div 
+                  initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={fadeUp}
+                  key={review.id} 
+                  className="bg-brand-card p-6 border border-white/5 flex flex-col rounded-md"
+                >
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h4 className="text-white font-bold tracking-widest uppercase text-sm">{review.name}</h4>
@@ -458,7 +533,7 @@ export default function ProductDetails() {
                       <CheckCircle className="w-3 h-3 mr-1" /> Verified Buyer
                     </div>
                   )}
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -468,26 +543,36 @@ export default function ProductDetails() {
         {relatedProducts.length > 0 && (
           <section className="py-20 bg-brand-card border-t border-white/10 px-6">
             <div className="max-w-7xl mx-auto">
-              <h2 className="font-display uppercase tracking-wide text-3xl md:text-5xl text-center mb-12 text-white">Complete The Look</h2>
+              <motion.h2 
+                initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={fadeUp}
+                className="font-display uppercase tracking-wide text-3xl md:text-5xl text-center mb-12 text-white"
+              >
+                Complete The Look
+              </motion.h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 {relatedProducts.map(prod => (
-                  <Link href={`/product/${prod.id}`} key={prod.id} className="group flex flex-col hover:-translate-y-1 transition-transform duration-300">
-                    <div className="relative aspect-[3/4] w-full bg-brand-dark overflow-hidden rounded-md mb-4 border border-transparent group-hover:border-white/10">
-                      <Image
-                        src={prod.image}
-                        alt={prod.name}
-                        fill
-                        referrerPolicy="no-referrer"
-                        className="object-cover group-hover:scale-[1.03] opacity-90 group-hover:opacity-100 transition-transform duration-700"
-                      />
-                    </div>
-                    <div className="text-left w-full mt-auto">
-                      <h3 className="font-sans font-medium text-white line-clamp-2 mb-1 group-hover:text-brand-primary transition-colors text-sm sm:text-base leading-tight">
-                        {prod.name}
-                      </h3>
-                      <div className="font-sans font-medium text-white text-sm">{formatPrice(prod.price)}</div>
-                    </div>
-                  </Link>
+                  <motion.div 
+                    initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={fadeUp}
+                    key={prod.id}
+                  >
+                    <Link href={`/product/${prod.id}`} className="group flex flex-col hover:-translate-y-1 transition-transform duration-300">
+                      <div className="relative aspect-[3/4] w-full bg-brand-dark overflow-hidden rounded-md mb-4 border border-transparent group-hover:border-white/10">
+                        <Image
+                          src={prod.image}
+                          alt={prod.name}
+                          fill
+                          referrerPolicy="no-referrer"
+                          className="object-cover group-hover:scale-[1.03] opacity-90 group-hover:opacity-100 transition-transform duration-700"
+                        />
+                      </div>
+                      <div className="text-left w-full mt-auto">
+                        <h3 className="font-sans font-medium text-white line-clamp-2 mb-1 group-hover:text-brand-primary transition-colors text-sm sm:text-base leading-tight">
+                          {prod.name}
+                        </h3>
+                        <div className="font-sans font-medium text-white text-sm">{formatPrice(prod.price)}</div>
+                      </div>
+                    </Link>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -497,47 +582,28 @@ export default function ProductDetails() {
         {/* Recently Viewed */}
         <section className="py-20 bg-brand-dark border-t border-white/10 px-6">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-xs uppercase font-bold tracking-[0.2em] text-gray-500 mb-8 border-b border-white/10 pb-4">Recently Viewed</h2>
+            <motion.h2 
+              initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={fadeUp}
+              className="text-xs uppercase font-bold tracking-[0.2em] text-gray-500 mb-8 border-b border-white/10 pb-4"
+            >
+              Recently Viewed
+            </motion.h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {recentlyViewed.map(prod => (
-                  <Link href={`/product/${prod.id}`} key={prod.id} className="group">
-                    <div className="relative aspect-square w-full bg-brand-card rounded-md overflow-hidden border border-white/5 group-hover:border-white/20 transition-colors">
-                      <Image src={prod.image} alt={prod.name} fill className="object-cover" referrerPolicy="no-referrer" />
-                    </div>
-                  </Link>
+                  <motion.div 
+                    initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={fadeUp}
+                    key={prod.id}
+                  >
+                    <Link href={`/product/${prod.id}`} className="group">
+                      <div className="relative aspect-square w-full bg-brand-card rounded-md overflow-hidden border border-white/5 group-hover:border-white/20 transition-colors">
+                        <Image src={prod.image} alt={prod.name} fill className="object-cover" referrerPolicy="no-referrer" />
+                      </div>
+                    </Link>
+                  </motion.div>
                 ))}
             </div>
           </div>
         </section>
-
-        {/* Mobile Sticky CTA 
-        <AnimatePresence>
-          {isStickyVisible && (
-            <motion.div 
-              initial={{ y: 100 }}
-              animate={{ y: 0 }}
-              exit={{ y: 100 }}
-              className="md:hidden fixed bottom-0 left-0 right-0 bg-brand-dark/95 backdrop-blur-md border-t border-white/10 p-4 pb-safe z-50 flex items-center gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]"
-            >
-              <button 
-                onClick={handleAddToCart}
-                className="flex-1 h-14 bg-brand-primary text-black rounded-md font-bold uppercase tracking-widest flex items-center justify-center text-sm shadow-[0_0_20px_-5px_rgba(0,0,0,0.4)]"
-              >
-                <ShoppingBag className="w-5 h-5 mr-2" /> Add To Cart
-              </button>
-              
-              <button 
-                onClick={handleWhatsAppCheckout}
-                className="w-14 h-14 shrink-0 bg-transparent border border-brand-primary text-brand-primary rounded-md font-bold flex items-center justify-center text-sm hover:bg-brand-primary hover:text-black transition-colors"
-                aria-label="Order on WhatsApp"
-              >
-                <MessageCircle className="w-6 h-6" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        */}
 
         {/* Size Guide Modal */}
         <AnimatePresence>

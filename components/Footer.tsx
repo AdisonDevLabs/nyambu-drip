@@ -6,6 +6,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Truck, ShieldCheck, Wallet, CheckCircle, MessageCircle, Send, Instagram, Facebook } from 'lucide-react';
 import { brand, footerQuickShopLinks, footerSupportLinks } from '@/lib/data/brand';
+import { motion } from 'motion/react';
+import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations';
 
 export function Footer() {
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -19,10 +21,13 @@ export function Footer() {
   return (
     <footer className="bg-brand-dark border-t border-white/10 pt-20 pb-8 relative z-20">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
+        <motion.div 
+          initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16"
+        >
           
           {/* Brand Section */}
-          <div className="lg:col-span-4 flex flex-col items-start text-left">
+          <motion.div variants={staggerItem} className="lg:col-span-4 flex flex-col items-start text-left">
             <Link href="/" className="font-display font-black text-3xl tracking-tighter text-white uppercase mb-4 block">
                {brand.name.split(' ')[0]}
                <span className="text-brand-primary">
@@ -48,30 +53,30 @@ export function Footer() {
                 <Wallet className="w-4 h-4 mr-1.5 text-brand-primary" /> <span className="text-[10px] font-bold uppercase tracking-wider">Affordable</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Quick Shop */}
-          <div className="lg:col-span-2">
+          <motion.div variants={staggerItem} className="lg:col-span-2">
             <h4 className="font-display text-white text-lg uppercase tracking-wide mb-6">Quick Shop</h4>
             <ul className="space-y-4">
               {footerQuickShopLinks.map((link, idx) => (
                 <li key={idx}><Link href={link.href} className="text-gray-400 hover:text-brand-primary text-sm transition-colors">{link.label}</Link></li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Support */}
-          <div className="lg:col-span-2">
+          <motion.div variants={staggerItem} className="lg:col-span-2">
             <h4 className="font-display text-white text-lg uppercase tracking-wide mb-6">Support</h4>
             <ul className="space-y-4">
               {footerSupportLinks.map((link, idx) => (
                 <li key={idx}><Link href={link.href} className="text-gray-400 hover:text-white text-sm transition-colors">{link.label}</Link></li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Contact & Newsletter */}
-          <div className="lg:col-span-4">
+          <motion.div variants={staggerItem} className="lg:col-span-4">
             <h4 className="font-display text-white text-lg uppercase tracking-wide mb-6">Contact Us</h4>
             
             <a href={`https://wa.me/${brand.whatsappNumber}?text=${encodeURIComponent("I'm ready to place an order")}`} target="_blank" rel="noreferrer" className="flex items-center w-full bg-brand-primary text-black p-4 group mb-6 hover:bg-brand-hover transition-colors shadow-[0_0_15px_-3px_rgba(0,0,0,0.3)] rounded-md">
@@ -113,19 +118,22 @@ export function Footer() {
                 TikTok
               </a>
             </div>
-          </div>
+          </motion.div>
           
-        </div>
+        </motion.div>
         
         {/* Copyright Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 gap-4">
+        <motion.div 
+          initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={fadeUp}
+          className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 gap-4"
+        >
           <p className="text-gray-500 text-[10px] sm:text-xs">
             &copy; {new Date().getFullYear()} {brand.name}. All rights reserved.
           </p>
           <p className="text-gray-600 text-[10px] sm:text-xs font-mono uppercase tracking-widest text-center md:text-right">
             Designed for mobile-first shopping experience in {brand.location}
           </p>
-        </div>
+        </motion.div>
       </div>
     </footer>
   );
