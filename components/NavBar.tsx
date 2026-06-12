@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, Heart, ShoppingBag, Menu, X, Home, Grid, Tag, MessageCircle } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { motion, AnimatePresence } from 'motion/react';
@@ -45,11 +46,20 @@ export function NavBar() {
       {/* Desktop Header & Mobile Top Bar */}
       <header className={`fixed top-10 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-brand-dark/95 backdrop-blur-md shadow-2xl py-1 border-b border-white/5' : 'bg-transparent py-1 border-b border-white/10'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 md:h-[60px]">
+          <div className="flex justify-between items-center h-14 md:h-[60px] relative">
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="font-display tracking-[0.15em] text-white flex flex-col justify-center mt-1 rounded-md focus:outline-none">
-                <span className="text-2xl md:text-3xl font-black uppercase leading-none">
+              <Link href="/" className="mr-2 sm:mr-3 z-10 flex-shrink-0 focus:outline-none">
+                <Image 
+                  src={brand.logo} 
+                  alt={`${brand.name} Logo`} 
+                  width={44} 
+                  height={44} 
+                  className="rounded-full object-cover border border-white/10 w-9 h-9 md:w-11 md:h-11"
+                />
+              </Link>
+              <Link href="/" className="font-display tracking-[0.15em] text-white flex flex-col justify-center mt-1 rounded-md focus:outline-none absolute left-1/2 -translate-x-1/2 md:static md:transform-none">
+                <span className="text-xl sm:text-2xl md:text-3xl font-black uppercase leading-none whitespace-nowrap">
                   {brand.name.split(' ')[0]}
                   <span className="text-brand-primary">
                     {brand.name.split(' ').length > 1 ? ' ' + brand.name.split(' ')[1] : ''}
