@@ -32,7 +32,7 @@ function ShopContent() {
     if (cat === 'deals') return 'deals';
     if (cat === 'new-arrivals') return 'just-dropped';
     if (cat === 'best-sellers') return 'best-sellers';
-    return 'trending';
+    return 'all'; // Default to 'all' instead of 'trending' to show everything
   };
 
   // Filter States
@@ -42,13 +42,14 @@ function ShopContent() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
-  const [sortOption, setSortOption] = useState('trending-now');
+  const [sortOption, setSortOption] = useState('default'); // Changed to 'default'
   const [discoveryMode, setDiscoveryMode] = useState<string>(() => getInitialDiscoveryMode(rawCategory));
   
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const [visibleCount, setVisibleCount] = useState(12);
+  // Start with 8 to allow scrolling pagination to trigger since there are 10 products
+  const [visibleCount, setVisibleCount] = useState(8);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -62,7 +63,7 @@ function ShopContent() {
 
   // Reset pagination when any filter changes
   useEffect(() => {
-    setVisibleCount(12);
+    setVisibleCount(8);
   }, [filterCategory, filterPrice, filterSize, searchQuery, sortOption, discoveryMode]);
 
   // Lock body scroll when modals are open
@@ -79,7 +80,7 @@ function ShopContent() {
     if (isLoadingMore) return;
     setIsLoadingMore(true);
     setTimeout(() => {
-      setVisibleCount(prev => prev + 12);
+      setVisibleCount(prev => prev + 8);
       setIsLoadingMore(false);
     }, 600);
   }, [isLoadingMore]);
@@ -170,18 +171,20 @@ function ShopContent() {
     } else if (sortOption === 'trending-now') {
       result.sort((a, b) => ((b.rating || 0) * (b.reviews || 0)) - ((a.rating || 0) * (a.reviews || 0)));
     }
+    // If 'default', it keeps the initial array order
 
     return result;
   }, [searchQuery, filterCategory, filterPrice, filterSize, discoveryMode, sortOption]);
 
-  const hasActiveFilters = (filterCategory && filterCategory !== 'All') || filterPrice || filterSize || searchQuery;
+  const hasActiveFilters = (filterCategory && filterCategory !== 'All') || filterPrice || filterSize || searchQuery || sortOption !== 'default' || discoveryMode !== 'all';
 
   const clearAllFilters = () => {
     setSearchQuery('');
     setFilterCategory('All');
     setFilterPrice(null);
     setFilterSize(null);
-    setDiscoveryMode('trending');
+    setDiscoveryMode('all');
+    setSortOption('default');
   };
 
   return (
@@ -300,11 +303,12 @@ function ShopContent() {
                   onChange={(e) => setSortOption(e.target.value)}
                   className="appearance-none bg-brand-dark border border-white/10 px-4 py-2 pr-8 rounded-md text-[10px] uppercase font-bold tracking-widest text-white focus:outline-none focus:border-white/50 cursor-pointer"
                 >
-                  <option value="trending-now">Trending Now</option>
-                  <option value="best-selling">Best Selling</option>
-                  <option value="new-arrivals">New Arrivals</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
+                  <option className="bg-brand-dark text-white" value="default">Default</option>
+                  <option className="bg-brand-dark text-white" value="trending-now">Trending Now</option>
+                  <option className="bg-brand-dark text-white" value="best-selling">Best Selling</option>
+                  <option className="bg-brand-dark text-white" value="new-arrivals">New Arrivals</option>
+                  <option className="bg-brand-dark text-white" value="price-low">Price: Low to High</option>
+                  <option className="bg-brand-dark text-white" value="price-high">Price: High to Low</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-500" />
               </div>
@@ -326,11 +330,12 @@ function ShopContent() {
                   onChange={(e) => setSortOption(e.target.value)}
                   className="w-full appearance-none bg-transparent border-none py-1 pr-8 text-xs font-bold uppercase tracking-widest text-white focus:outline-none"
                 >
-                  <option value="trending-now">Trending Now</option>
-                  <option value="best-selling">Best Selling</option>
-                  <option value="new-arrivals">New Arrivals</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
+                  <option className="bg-brand-dark text-white" value="default">Default</option>
+                  <option className="bg-brand-dark text-white" value="trending-now">Trending Now</option>
+                  <option className="bg-brand-dark text-white" value="best-selling">Best Selling</option>
+                  <option className="bg-brand-dark text-white" value="new-arrivals">New Arrivals</option>
+                  <option className="bg-brand-dark text-white" value="price-low">Price: Low to High</option>
+                  <option className="bg-brand-dark text-white" value="price-high">Price: High to Low</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-500" />
               </div>
@@ -358,12 +363,14 @@ function ShopContent() {
                   {searchQuery ? `Search Results for "${searchQuery}"` : 
                    filterCategory !== 'All' ? filterCategory :
                    discoveryMode === 'deals' ? 'Flash Deals' :
+                   discoveryMode === 'all' ? 'All Styles' :
                    discoveryChips.find(c => c.id === discoveryMode)?.context || 'All Styles'}
                 </div>
                 <div className="hidden sm:block w-1 h-1 rounded-full bg-white/20"></div>
                 <div className="text-sm font-medium text-white flex items-center">
                   <span className="text-gray-500 mr-2">Sorted by:</span>
-                  {sortOption === 'trending-now' ? 'Trending Now' :
+                  {sortOption === 'default' ? 'Default' :
+                   sortOption === 'trending-now' ? 'Trending Now' :
                    sortOption === 'best-selling' ? 'Best Selling' :
                    sortOption === 'new-arrivals' ? 'New Arrivals' :
                    sortOption === 'price-low' ? 'Price: Low to High' : 'Price: High to Low'}
@@ -440,7 +447,7 @@ function ShopContent() {
               
               <motion.div variants={staggerItem} className="flex flex-wrap justify-center gap-3 mb-12">
                 <button 
-                  onClick={() => { clearAllFilters(); setDiscoveryMode('trending'); setSortOption('trending-now'); }}
+                  onClick={() => { clearAllFilters(); setDiscoveryMode('all'); setSortOption('default'); }}
                   className="h-12 px-6 bg-brand-primary text-black rounded-md text-xs font-bold uppercase tracking-widest hover:bg-brand-hover transition-colors"
                 >
                   Clear Filters
@@ -635,14 +642,14 @@ function ShopContent() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsAdvancedFiltersOpen(false)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
             />
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-brand-card border-l border-white/10 shadow-2xl z-50 flex flex-col pb-safe"
+              className="fixed top-0 right-0 h-[100dvh] w-full sm:w-[400px] bg-brand-card border-l border-white/10 shadow-2xl z-[100] flex flex-col"
             >
               <div className="flex items-center justify-between p-6 border-b border-white/5">
                 <h2 className="font-display uppercase tracking-widest text-xl flex items-center text-white">
@@ -730,7 +737,7 @@ function ShopContent() {
                 </div>
               </div>
               
-              <div className="p-6 border-t border-white/5 bg-brand-card flex gap-4">
+              <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] border-t border-white/5 bg-brand-card flex gap-4">
                 <button
                   onClick={clearAllFilters}
                   className="flex-1 py-3.5 bg-transparent border rounded-md border-white/20 text-white hover:bg-white/5 font-bold uppercase tracking-widest text-xs transition-colors"

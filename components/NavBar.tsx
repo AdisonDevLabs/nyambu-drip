@@ -176,7 +176,7 @@ export function NavBar() {
             <span className="text-[9px] font-medium tracking-wide uppercase">Shop</span>
           </Link>
           
-          <div className="relative -top-6">
+          <div className="relative">
             <button 
               onClick={() => setIsCartOpen(true)}
               className="bg-brand-primary text-black p-3 rounded-full flex flex-col items-center justify-center h-14 w-14 border-[3px] border-brand-card shadow-lg focus:outline-none"
